@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/prometheus/client_golang/api"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -702,5 +703,20 @@ func TestAPIClientDo(t *testing.T) {
 		if want != got {
 			t.Errorf("unexpected body: want %q, got %q", want, got)
 		}
+	}
+}
+
+func TestReproIssue479(t *testing.T) {
+	client, err := api.NewClient(api.Config{
+		Address: "http://localhost:80",
+	})
+	if err != nil {
+		t.Errorf("failed to create Prometheus API client: %v", err)
+	}
+	promAPI := NewAPI(client)
+	_, err = promAPI.Query(context.Background(), "whatever", time.Time{})
+	if err != nil {
+		apiErr := err.(*Error)
+		t.Errorf("querying failed with [%v]. Details: [%s]", err, strings.TrimSpace(apiErr.Detail))
 	}
 }

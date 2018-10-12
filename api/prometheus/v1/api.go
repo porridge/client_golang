@@ -71,6 +71,7 @@ const (
 type Error struct {
 	Type ErrorType
 	Msg  string
+	Detail string
 }
 
 func (e *Error) Error() string {
@@ -472,6 +473,7 @@ func (c apiClient) Do(ctx context.Context, req *http.Request) (*http.Response, [
 		return resp, body, &Error{
 			Type: ErrBadResponse,
 			Msg:  fmt.Sprintf("bad response code %d", resp.StatusCode),
+			Detail: string(body),
 		}
 	}
 
